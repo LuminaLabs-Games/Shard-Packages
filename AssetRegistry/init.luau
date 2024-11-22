@@ -7,6 +7,10 @@ AssetRegistry.__index = AssetRegistry
 function AssetRegistry.new()
 	local self = setmetatable({}, AssetRegistry)
 
+	self.objectFolder = Instance.new("Folder", ReplicatedStorage)
+	local uncategorized = Instance.new("Folder", self.objectFolder)
+	uncategorized.Name = "Uncategorized"
+
 	self:initialize()
 
 	return self
@@ -24,15 +28,12 @@ end
 function AssetRegistry:initialize()
 	self:_hideObjects()
 	local descendants = CollectionService:GetTagged("Object")
-	local objectFolder = CollectionService:GetTagged("ObjectFolder")[1]
 
 	for _, object in descendants do
 		if not object:FindFirstAncestor("Objects") then
-			object.Parent = objectFolder.Uncategorized
+			object.Parent = self.objectFolder.Uncategorized
 		end
 	end
-
-	objectFolder.Parent = ReplicatedStorage
 end
 
 return AssetRegistry
