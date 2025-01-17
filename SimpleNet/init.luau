@@ -21,7 +21,7 @@ type RemoteEvent = {
 type RemoteFunction = {
 	Invoke: (...any) -> any,
 	Destroy: () -> any,
-	Connect: ((player: Player, ...any) -> any) -> any,
+	Connect: (self: RemoteFunction, callback: (any, ...any) -> ()) -> RemoteFunction,
 }
 
 type BindableEvent = {
