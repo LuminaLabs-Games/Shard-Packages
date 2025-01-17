@@ -63,7 +63,7 @@ function SimpleNet:remoteFunction(name: string): RemoteFunction
 	if RunService:IsServer() then
 		local remoteFunction = script:FindFirstChild(name)
 		if not remoteFunction then
-			remoteFunction = Instance.new("RemoteEvent")
+			remoteFunction = Instance.new("RemoteFunction")
 			remoteFunction.Name = name
 			remoteFunction.Parent = script
 		end
