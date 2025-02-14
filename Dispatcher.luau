@@ -1,15 +1,15 @@
 export type Dispatcher = {
 	new: () -> Dispatcher,
-	Subscribe: (self: Dispatcher, event: string, callback: any, callbackName: string?) -> nil,
-	subscribe: (self: Dispatcher, event: string, callback: any, callbackName: string?) -> nil,
+	Subscribe: (self: Dispatcher, event: string, callback: any, callbackName: string?) -> (() -> nil),
+	subscribe: (self: Dispatcher, event: string, callback: any, callbackName: string?) -> (() -> nil),
 	SubscribeOnce: (self: Dispatcher, event: string, callback: any, callbackName: string?) -> nil,
 	Unsubscribe: (self: Dispatcher, event: string, callbackName: string?) -> nil,
 	unsubscribe: (self: Dispatcher, event: string, callbackName: string?) -> nil,
 	Publish: (self: Dispatcher, event: string, payload: any) -> nil,
 	publish: (self: Dispatcher, event: string, payload: any) -> nil,
 	PublishDeferred: (self: Dispatcher, event: string, payload: any) -> nil,
+	PublishNoYield: (event: string, payload: any) -> nil,
 }
-
 local Dispatcher = {}
 Dispatcher.__index = Dispatcher
 
@@ -38,10 +38,14 @@ function Dispatcher:Subscribe(event: string, callback: any, callbackName: string
 	else
 		table.insert(eventTable[event], callback)
 	end
+
+	return function()
+		self:Unsubscribe(event, callbackName)
+	end
 end
 
-function Dispatcher:subscribe(event: string, callbackName: string?, callback: any)
-	self:Subscribe(event, callback, callbackName)
+function Dispatcher:subscribe(event: string, callback: any, callbackName: string?)
+	return self:Subscribe(event, callback, callbackName)
 end
 
 function Dispatcher:SubscribeOnce(event: string, callback: any, callbackName: string?)
@@ -100,6 +104,19 @@ end
 
 function Dispatcher:publish(event: string, ...: any)
 	self:Publish(event, ...)
+end
+
+function Dispatcher:PublishNoYield(event: string, ...: any)
+	local eventTable = self:_getEventTable()
+	local eventListeners = eventTable[event]
+
+	if not eventListeners then
+		return
+	end
+
+	for _, callback in eventListeners do
+		task.spawn(callback, ...)
+	end
 end
 
 return setmetatable(Dispatcher, {
