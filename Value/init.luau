@@ -23,6 +23,10 @@ function Value:set(value)
 	self.Changed:Fire(value)
 end
 
+function Value:observe(callback: (any) -> ())
+	return self.Changed:Connect(callback)
+end
+
 return setmetatable(Value, {
 	__index = ValueSingleton,
 	__call = function(_, arg: any)
