@@ -68,6 +68,14 @@ end
 function Player:SetProperty(property: string, value: any)
 	if self._properties[property] then
 		self._properties[property] = value
+
+		if not self._character then
+			return self
+		end
+
+		if self._character["Humanoid"] and self._character["Humanoid"][property] then
+			self._character["Humanoid"][property] = value
+		end
 	end
 
 	return self
