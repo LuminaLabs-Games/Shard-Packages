@@ -5,7 +5,7 @@ local HttpService = game:GetService("HttpService")
 
 -- A running value to track if the script is currently executing or not
 local runningValue = nil
-if not script:WaitForChild("running") then 
+if not script:WaitForChild("running", 2) then 
 	runningValue = Instance.new("BoolValue")
 	runningValue.Parent = script
 	runningValue.Name = "running"
