@@ -5,12 +5,12 @@ local HttpService = game:GetService("HttpService")
 
 -- A running value to track if the script is currently executing or not
 local runningValue = nil
-if not script:WaitForChild("running", 2) then 
+if not script:FindFirstChild("running") then 
 	runningValue = Instance.new("BoolValue")
 	runningValue.Parent = script
 	runningValue.Name = "running"
 else
-	runningValue = script:WaitForChild("running")
+	runningValue = script:FindFirstChild("running")
 end
 
 -- Type definition for a single field in an embed
