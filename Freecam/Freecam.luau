@@ -9,6 +9,7 @@ local function freecam()
 	local tan   = math.tan
 	
 	local ContextActionService = game:GetService("ContextActionService")
+	local RunService = game:GetService("RunService")
 	local Players = game:GetService("Players")
 	local StarterGui = game:GetService("StarterGui")
 	local UserInputService = game:GetService("UserInputService")
