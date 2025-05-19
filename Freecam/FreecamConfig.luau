@@ -3,6 +3,6 @@ return {
 		-- [34588487] = {200}, -- [GroupId] = { group id's }
 	},
 	ALLOWED_USERS = { 
-		15886356, -- UserId
+		-- 15886356, -- UserId
 	},
 }
