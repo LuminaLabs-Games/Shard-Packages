@@ -1,3 +1,4 @@
+local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -5,11 +6,14 @@ local RunService = game:GetService("RunService")
 local Libraries = ReplicatedStorage.Libraries
 local Packages = ReplicatedStorage.Packages
 
-local observePlayer = require(Packages.Observers.observePlayer)
 local PlayerProfile = require(script.Components.PlayerProfile)
 local ProfileStore = require(Libraries.ProfileStore)
 local Replica = require(Libraries.Replica.ReplicaServer)
+
+local observePlayer = require(Packages.Observers.observePlayer)
+local DevProducts = require(script.Components.DevProductsHandler)
 local Settings = require(script.Components.Settings)
+local Types = require(script.Components.Types)
 
 local Data = {}
 Data.__index = Data
@@ -20,15 +24,19 @@ function DataSingleton:initialize()
 	self._playerToken = Replica.Token("PlayerData")
 	self._playerStore = ProfileStore.New("PlayerStore", Settings.TEMPLATE)
 	if RunService:IsStudio() and Settings.DEBUG_MOCK then
-		print("I'm mocking you")
+		print("[ProfileStore]: Using mock profile store")
 		self._playerStore = self._playerStore.Mock
 	end
 
 	self._profiles = {} :: { [Player]: typeof(self._playerStore:StartSessionAsync()) }
 	self:_observePlayers()
+
+	MarketplaceService.ProcessReceipt = function(receiptInfo)
+		return DevProducts:ProcessReceipt(receiptInfo, self)
+	end
 end
 
-function DataSingleton:GetProfileAsync(player: Player)
+function DataSingleton:GetProfileAsync(player: Player): Types.PlayerProfile?
 	while not self._profiles[player] and player.Parent == Players do
 		task.wait()
 	end
@@ -58,7 +66,7 @@ function DataSingleton:_playerAdded(player: Player)
 
 	profile.OnSessionEnd:Connect(function()
 		self._profiles[player] = nil
-		player:Kick(Settings.SEESION_END_MESSAGE)
+		player:Kick(Settings.SESSION_END_MESSAGE)
 	end)
 
 	if player.Parent ~= Players then
@@ -75,13 +83,35 @@ function DataSingleton:_playerAdded(player: Player)
 	self._profiles[player] = PlayerProfile.new(player, profile, replica)
 end
 
+function DataSingleton:GetPlayerStore()
+	return self._playerStore
+end
+
+function DataSingleton:GetProfileStore()
+	return self._playerStore
+end
+
+function DataSingleton:GetPlayerKey(player: Player): string
+	return `{player.UserId}{Settings.SUFFIX}`
+end
+
+function DataSingleton:GetKeyFromUserId(userId: number): string
+	return `{userId}{Settings.SUFFIX}`
+end
+
 function DataSingleton:_observePlayers()
 	observePlayer(function(player)
 		self:_playerAdded(player)
 		return function()
 			local profile = self._profiles[player] and self._profiles[player]:GetProfile()
 			if profile then
-				profile:EndSession()
+				-- We do RunService.Heartbeat:Wait() to allow BindToClose to fire, when a shutdown happens Roblox kicks all players then does BindsToClose
+				-- This correctly identifies the shutdown reason in the .OnLastSave method of ProfileStore.
+				-- (I.e. you want to detect if a dev/owner shutdown the server in order to save their boosts or something like that)
+				RunService.Heartbeat:Wait()
+				if profile:IsActive() then
+					profile:EndSession()
+				end
 			end
 		end
 	end)

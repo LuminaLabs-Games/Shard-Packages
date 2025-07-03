@@ -8,37 +8,39 @@ function PlayerProfile.new(player, profile, replica)
 	self._profile = profile
 	self._replica = replica
 
+	self._profile:MessageHandler(function(message, processed)
+		--[[```lua
+		-- This is where you handle global updates, like gifting:
+		if message[1] == "Gift" then
+			local sender = message[2]
+			local giftType = message[3]
+			print(`gift received from {sender} of type {giftType}`)
+		end
+
+		processed()
+		--]]
+	end)
+
 	return self
 end
 
--- API
-function PlayerProfile:CanAfford(currency: string, amount: number)
-	local retrieved = self:Get(currency)
+-- Define custom player profile functions here:
 
-	return retrieved >= amount
-end
+--[[```lua
+-- Example:
+function PlayerProfile:addCash(amount: number)
+	if not self:IsActive() then return end -- Check if the profile is still active
 
-function PlayerProfile:Increment(currency: string, amount: number)
-	local retrieved = self:Get(currency)
+	local retrieved = self:Get("Cash")
 	local newAmount = retrieved + amount
 
 	if newAmount < 0 then
 		newAmount = 0
 	end
 
-	self:Set(currency, newAmount)
+	self:Set("Cash", newAmount)
 end
-
-function PlayerProfile:Decrement(currency: string, amount: number)
-	local retrieved = self:Get(currency)
-	local newAmount = retrieved - amount
-
-	if newAmount < 0 then
-		newAmount = 0
-	end
-
-	self:Set(currency, newAmount)
-end
+```]]
 
 -- INTERNAL API
 function PlayerProfile:Get(keyToGet: string, tableToSearch: {})
@@ -94,6 +96,28 @@ end
 
 function PlayerProfile:IsActive()
 	return self._profile:IsActive()
+end
+
+function PlayerProfile:Increment(currency: string, amount: number)
+	local retrieved = self:Get(currency)
+	local newAmount = retrieved + amount
+
+	if newAmount < 0 then
+		newAmount = 0
+	end
+
+	self:Set(currency, newAmount)
+end
+
+function PlayerProfile:Decrement(currency: string, amount: number)
+	local retrieved = self:Get(currency)
+	local newAmount = retrieved - amount
+
+	if newAmount < 0 then
+		newAmount = 0
+	end
+
+	self:Set(currency, newAmount)
 end
 
 return PlayerProfile
