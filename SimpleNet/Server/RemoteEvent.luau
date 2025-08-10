@@ -57,9 +57,11 @@ function RemoteEvent:FireAllDelayed(delay: number, ...: any): ()
 end
 
 function RemoteEvent:Connect(callback: (player: Player, args: any) -> ()): ()
-	self._remoteEvent.OnServerEvent:Connect(function(player: Player, ...: any): ()
+	local callbackConnection = self._remoteEvent.OnServerEvent:Connect(function(player: Player, ...: any): ()
 		callback(player, ...)
 	end)
+
+	return callbackConnection
 end
 
 function RemoteEvent:Destroy()
