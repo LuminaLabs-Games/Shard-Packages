@@ -1,75 +1,105 @@
------------------------------ Signal Module -----------------------------
--- > Used to create, connect, wait and destroy signals.
--- > Created by Quenty
------------------------------------------------------------------------------------------
+--!strict
 
---- Lua-side duplication of the API of events on Roblox objects.
--- Signals are needed for to ensure that for local events objects are passed by
--- reference rather than by value where possible, as the BindableEvent objects
--- always pass signal arguments by value, meaning tables will be deep copied.
--- Roblox's deep copy method parses to a non-lua table compatable format.
--- @classmod Signal
+local FastSpawnListener = Instance.new('BindableFunction')
+
+FastSpawnListener.OnInvoke = function(cb: (...any) -> (), ...: any)
+	cb(...)
+end :: any
+
+export type Connection = {
+	Connected: boolean,
+	Disconnect: () -> (),
+	Destroy: () -> (),
+}
+export type FunctionArgs<T> = any --[[typeof((function(...)
+	local x: T
+	x(...)
+	return ...
+end)())]]
+export type Signal<T> = {
+	Connect: (Signal<T>, T) -> Connection,
+	Wait: (Signal<T>) -> ...FunctionArgs<T>,
+	Fire: (Signal<T>, ...FunctionArgs<T>) -> (),
+	Destroy: () -> (),
+}
+
+local Connection = {}
+Connection.__index = {}
+
+function Connection.__index.Disconnect(self: any)
+	if self.Connected then
+		self.Connected = false
+		self._signal._cbSet[self._cb] = nil
+		self._signal = nil
+		self._cb = nil
+	end
+end
+Connection.__index.Destroy = Connection.__index.Disconnect
+
+function Connection.new(_signal: any, _cb: any): Connection
+	local self = {}
+	setmetatable(self, Connection)
+	self.Connected = true
+	self._signal = _signal
+	self._cb = _cb
+	
+	return self :: any
+end
 
 local Signal = {}
-Signal.__index = Signal
-Signal.ClassName = "Signal"
+Signal.__index = {}
 
---- Constructs a new signal.
--- @constructor Signal.new()
--- @treturn Signal
-function Signal.new()
-	local self = setmetatable({}, Signal)
-
-	self._bindableEvent = Instance.new("BindableEvent")
-	self._argData = nil
-	self._argCount = nil -- Prevent edge case of :Fire("A", nil) --> "A" instead of "A", nil
-
-	return self
+function Signal.__index.Connect(self: any, cb: any): Connection
+	local conn = Connection.new(self, cb)
+	self._cbSet[cb] = true
+	return conn
 end
 
---- Fire the event with the given arguments. All handlers will be invoked. Handlers follow
--- Roblox signal conventions.
--- @param ... Variable arguments to pass to handler
--- @treturn nil
-function Signal:Fire(...)
-	self._argData = {...}
-	self._argCount = select("#", ...)
-	self._bindableEvent:Fire()
-	self._argData = nil
-	self._argCount = nil
+function Signal.__index.Destroy(self: any)
+	self._cbSet = {}
+	self._threads = {}
 end
 
---- Connect a new handler to the event. Returns a connection object that can be disconnected.
--- @tparam function handler Function handler called with arguments passed when `:Fire(...)` is called
--- @treturn Connection Connection object that can be disconnected
-function Signal:Connect(handler)
-	if not (type(handler) == "function") then
-		error(("connect(%s)"):format(typeof(handler)), 2)
+function Signal.__index.Wait(self: any): ...any
+	local thread = coroutine.running()
+	table.insert(self._threads, thread)
+	return coroutine.yield()
+end
+
+function Signal.__index.Fire(self: any, ...: any)
+	local cbs = {}
+	for cb in pairs(self._cbSet) do
+		table.insert(cbs, cb)
 	end
-
-	return self._bindableEvent.Event:Connect(function()
-		handler(unpack(self._argData, 1, self._argCount))
-	end)
-end
-
---- Wait for fire to be called, and return the arguments it was given.
--- @treturn ... Variable arguments from connection
-function Signal:Wait()
-	self._bindableEvent.Event:Wait()
-	assert(self._argData, "Missing arg data, likely due to :TweenSize/Position corrupting threadrefs.")
-	return unpack(self._argData, 1, self._argCount)
-end
-
---- Disconnects all connected events to the signal. Voids the signal as unusable.
--- @treturn nil
-function Signal:Destroy()
-	if self._bindableEvent then
-		self._bindableEvent:Destroy()
-		self._bindableEvent = nil
+	for i = 1, #cbs do
+		local cb = cbs[i]
+		coroutine.resume(
+			coroutine.create(
+				function(...)
+					FastSpawnListener:Invoke(cb, ...)
+				end
+			),
+			...
+		)
 	end
+	
+	local threads = self._threads
+	if #threads > 0 then
+		self._threads = {}
+		for i = 1, #threads do
+			coroutine.resume(threads[i], ...)
+		end
+	end
+end
 
-	self._argData = nil
-	self._argCount = nil
+function Signal.new(): Signal<any>
+	local self = {}
+	setmetatable(self, Signal)
+	
+	self._cbSet = {}
+	self._threads = {}
+	
+	return self :: any
 end
 
 return Signal
