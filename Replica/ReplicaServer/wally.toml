@@ -1,10 +1,11 @@
 [package]
 name = "luminalabsgames/replicaserver"
 description = "Replica server for Roblox"
-version = "1.0.0"
+version = "1.0.3"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 license = "MIT"
 authors = ["LuminaLabsGames"]
 
 [dependencies]
+ReplicaShared = "luminalabsgames/replicashared@1.0.0"

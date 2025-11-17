@@ -8,3 +8,4 @@ license = "MIT"
 authors = ["LuminaLabsGames"]
 
 [dependencies]
+ReplicaShared = "luminalabsgames/replicashared@1.0.0"
