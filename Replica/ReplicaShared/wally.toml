@@ -1,6 +1,6 @@
 [package]
-name = "luminalabsgames/replica"
-description = "Replica server and client utilities for Roblox"
+name = "luminalabsgames/replicashared"
+description = "Replica shared for Roblox"
 version = "1.0.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
