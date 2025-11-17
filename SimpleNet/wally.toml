@@ -1,0 +1,10 @@
+[package]
+name = "luminalabsgames/simplenet"
+description = "A simplified networking utility for Roblox that provides an easy interface for RemoteEvents, RemoteFunctions, BindableEvents, and BindableFunctions"
+version = "1.0.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+license = "MIT"
+authors = ["LuminaLabs-Games", "RealGvistic", "newwil"]
+
+[dependencies]

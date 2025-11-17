@@ -1,0 +1,6 @@
+{
+    "name": "ShardLeaderboard",
+    "tree": {
+        "$path": "."
+    }
+}

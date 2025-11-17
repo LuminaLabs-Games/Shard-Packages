@@ -1,0 +1,10 @@
+[package]
+name = "luminalabsgames/shardmath"
+description = "Math utilities for Roblox including number formatting with suffixes"
+version = "1.0.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+license = "MIT"
+authors = ["LuminaLabsGames"]
+
+[dependencies]

@@ -1,0 +1,10 @@
+[package]
+name = "luminalabsgames/slider"
+description = "A slider utility module for Roblox"
+version = "1.0.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+license = "MIT"
+authors = ["LuminaLabsGames"]
+
+[dependencies]
