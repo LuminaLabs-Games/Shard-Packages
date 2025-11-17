@@ -1,5 +1,8 @@
-local SimpleNet = require(script.Parent.Parent.SimpleNet)
-local Signal = require(script.Parent.Parent.Signal)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Packages = ReplicatedStorage.Packages
+
+local SimpleNet = require(Packages.SimpleNet)
+local Signal = require(Packages.Signal)
 local Log = require(script.Parent.Log)
 
 local ShardController = {}
