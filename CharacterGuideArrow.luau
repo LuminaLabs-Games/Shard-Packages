@@ -4,7 +4,22 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local observeLocalCharacter = require(ReplicatedStorage.Packages.Observers.observeCharacter)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 
-local arrowTemplate = ReplicatedStorage:WaitForChild("Objects"):WaitForChild("Effects"):WaitForChild("GuideBeam")
+-- local arrowTemplate = ReplicatedStorage:WaitForChild("Objects"):WaitForChild("Effects"):WaitForChild("GuideBeam")
+
+local arrowTemplate = Instance.new("Beam")
+arrowTemplate.Name = "GuideBeam"
+arrowTemplate.FaceCamera = true
+arrowTemplate.Segments = 1
+arrowTemplate.Texture = "rbxassetid://100434834356868"
+arrowTemplate.TextureLength = 1.5
+arrowTemplate.TextureMode = Enum.TextureMode.Wrap
+arrowTemplate.Transparency = NumberSequence.new({
+	NumberSequenceKeypoint.new(0, 0.606),
+	NumberSequenceKeypoint.new(0.218, 0.575),
+	NumberSequenceKeypoint.new(1, 0.2),
+})
+arrowTemplate.Width0 = 1.5
+arrowTemplate.Width1 = 1.5
 
 local CharacterGuideArrow = {}
 CharacterGuideArrow.__index = CharacterGuideArrow
