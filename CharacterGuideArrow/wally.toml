@@ -8,3 +8,6 @@ license = "MIT"
 authors = ["LuminaLabsGames"]
 
 [dependencies]
+Trove = "sleitnick/trove@1.8.0"
+Observers = "luminalabsgames/observers@1.0.0"
+

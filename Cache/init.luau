@@ -1,6 +1,7 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Trove = require(script.Parent.Trove)
+local Trove = require(ReplicatedStorage.Packages.Trove)
 local Cache = {}
 Cache.__index = Cache
 

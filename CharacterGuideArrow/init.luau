@@ -4,7 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local observeLocalCharacter = require(ReplicatedStorage.Packages.Observers.observeCharacter)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 
--- local arrowTemplate = ReplicatedStorage:WaitForChild("Objects"):WaitForChild("Effects"):WaitForChild("GuideBeam")
+local ARROW_COLOR = Color3.fromRGB(255, 255, 255)
 
 local arrowTemplate = Instance.new("Beam")
 arrowTemplate.Name = "GuideBeam"
@@ -18,6 +18,7 @@ arrowTemplate.Transparency = NumberSequence.new({
 	NumberSequenceKeypoint.new(0.218, 0.575),
 	NumberSequenceKeypoint.new(1, 0.2),
 })
+arrowTemplate.Color = ColorSequence.new(ARROW_COLOR)
 arrowTemplate.Width0 = 1.5
 arrowTemplate.Width1 = 1.5
 

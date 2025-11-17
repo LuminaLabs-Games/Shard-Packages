@@ -3,6 +3,10 @@
 	12/24/2024 @ 12:01AM
 	@module UIStrokesAdjuster
 		Adjusts the UIStrokes of GuiObjects based on viewport size and distance from BillboardGuis
+
+	RealGvistic
+	11/17/2025 @ 3:45PM
+	Added some small fixes and ignoreBillboards
 ]=]
 
 -----[[ Configuration ]]-----

@@ -1,4 +1,6 @@
-local Signal = require(script.Parent.Signal)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Signal = require(ReplicatedStorage.Packages.Signal)
 
 local Value = {}
 Value.__index = Value

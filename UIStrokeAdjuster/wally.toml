@@ -1,7 +1,7 @@
 [package]
 name = "luminalabsgames/uistrokeadjuster"
 description = "UI stroke adjustment utility for Roblox"
-version = "1.0.0"
+version = "1.0.1"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 license = "MIT"
