@@ -1,10 +1,10 @@
 [package]
-name = "luminalabsgames/shardleaderboard"
+name = "newwildev/shardleaderboard"
 description = "Leaderboard system for Roblox with all-time and expirable entries"
-version = "1.0.0"
+version = "1.0.2"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 license = "MIT"
-authors = ["LuminaLabsGames"]
+authors = ["newwil"]
 
 [dependencies]

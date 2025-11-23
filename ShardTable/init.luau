@@ -4,7 +4,8 @@ local dictionaryMerge = require(script.utils.dictionaryMerge)
 local Table = {}
 
 function Table:merge(table1: { any }, table2: { any })
-	local isArray = if next(table1) ~= nil and next(table2) ~= nil then true else false
+	-- Check if table1 is an array (has sequential numeric indices starting from 1)
+	local isArray = #table1 > 0 and next(table1) == 1
 
 	if isArray then
 		return arrayMerge(table1, table2)
