@@ -1,3 +1,4 @@
+local RunService = game:GetService("RunService")
 --[=[
     Shard Framework Logging System
     Provides structured logging with levels, formatting, and filtering
@@ -114,7 +115,7 @@ local function formatMessage(level: number, serviceName: string, message: string
 	table.insert(parts, message)
 
 	-- Additional data
-	if data ~= nil then
+	if data ~= nil and not RunService:IsStudio() then
 		if type(data) == "table" then
 			local dataStr = "{"
 			for k, v in data do
@@ -160,9 +161,17 @@ function Log:log(level: number, message: string, data: any?)
 
 	-- Output based on level
 	if level >= Log.Level.ERROR then
-		warn(formatted)
+		if data then
+			warn(formatted, data)
+		else
+			warn(formatted)
+		end
 	else
-		print(formatted)
+		if data then
+			print(formatted, data)
+		else
+			print(formatted)
+		end
 	end
 end
 
