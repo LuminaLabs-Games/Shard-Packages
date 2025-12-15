@@ -1,0 +1,10 @@
+[package]
+name = "luminalabsgames/simplepath"
+description = "A simplified pathfinding utility for Roblox that provides an easy interface for path creation and navigation"
+version = "1.0.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+license = "MIT"
+authors = ["LuminaLabs-Games", "RealGvistic", "newwil"]
+
+[dependencies]
