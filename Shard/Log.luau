@@ -159,7 +159,6 @@ function Log:log(level: number, message: string, data: any?)
 		table.remove(logHistory, 1)
 	end
 
-	-- Output based on level
 	if level >= Log.Level.ERROR then
 		if data then
 			warn(formatted, data)
