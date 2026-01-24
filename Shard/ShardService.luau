@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 
 local SimpleNet = require(ReplicatedStorage.Packages.SimpleNet)
 local Signal = require(ReplicatedStorage.Packages.Signal)
@@ -316,7 +317,45 @@ function ShardService:isFeatureEnabled(name: string)
 end
 
 --[=[
-    Gets a configuration value
+    Extracts value from a Roblox Value instance
+    @param instance -- The Value instance (StringValue, NumberValue, etc.)
+    @return any -- The extracted value
+]=]
+local function extractValueFromInstance(instance: Instance): any
+	if
+		instance:IsA("StringValue")
+		or instance:IsA("NumberValue")
+		or instance:IsA("IntValue")
+		or instance:IsA("BoolValue")
+		or instance:IsA("ObjectValue")
+		or instance:IsA("CFrameValue")
+		or instance:IsA("Vector3Value")
+		or instance:IsA("Color3Value")
+		or instance:IsA("BrickColorValue")
+		or instance:IsA("RayValue")
+	then
+		return instance.Value
+	end
+	return nil
+end
+
+--[=[
+    Gets the config container for this service from ServerScriptService.Configs
+    @return Instance? -- The config container or nil
+]=]
+function ShardService:_getConfigContainer(): Instance?
+	local configs = ServerScriptService:FindFirstChild("Configs")
+	if not configs then
+		return nil
+	end
+	return configs:FindFirstChild(self.name)
+end
+
+--[=[
+    Gets a configuration value with hierarchical lookup:
+    1. Check attributes on the service's config container
+    2. Check child Value objects in the config container
+    3. Fall back to code-defined config
     @param key -- The configuration key
     @param default -- Default value if key doesn't exist
     @return any -- The configuration value
@@ -325,6 +364,24 @@ function ShardService:getConfig(key: string?, default: any?)
 	if key == nil and default == nil then
 		return self._config
 	end
+
+	local configContainer = self:_getConfigContainer()
+
+	if configContainer then
+		local attribute = configContainer:GetAttribute(key)
+		if attribute ~= nil then
+			return attribute
+		end
+
+		local childValue = configContainer:FindFirstChild(key)
+		if childValue then
+			local extracted = extractValueFromInstance(childValue)
+			if extracted ~= nil then
+				return extracted
+			end
+		end
+	end
+
 	return if self._config[key] ~= nil then self._config[key] else default
 end
 
