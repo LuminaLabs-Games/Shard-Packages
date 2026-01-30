@@ -55,7 +55,17 @@ local maxHistorySize = 1000
 function Log.new(serviceName: string)
 	local self = setmetatable({}, Log)
 	self.serviceName = serviceName
+	self._debugEnabled = false
 	return self
+end
+
+--[=[
+    Sets whether debug logging is enabled for this logger
+    Call this in your service/controller init with self:isFeatureEnabled("debugMode")
+    @param enabled -- Whether debug logging should be enabled
+]=]
+function Log:setDebugEnabled(enabled: boolean)
+	self._debugEnabled = enabled
 end
 
 --[=[
@@ -190,6 +200,18 @@ end
 ]=]
 function Log:debug(message: string, data: any?)
 	self:log(Log.Level.DEBUG, message, data)
+end
+
+--[=[
+    Conditional debug logging - only logs if debugEnabled was set via setDebugEnabled()
+    Useful for verbose debugging that should only appear when debugMode feature flag is enabled
+    @param message -- Log message
+    @param data -- Optional additional data
+]=]
+function Log:debugLog(message: string, data: any?)
+	if self._debugEnabled then
+		self:log(Log.Level.DEBUG, message, data)
+	end
 end
 
 --[=[

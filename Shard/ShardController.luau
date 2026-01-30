@@ -319,13 +319,72 @@ function ShardController:isFeatureEnabled(name: string)
 end
 
 --[=[
+    Extracts value from a Roblox Value instance
+    @param instance -- The Value instance (StringValue, NumberValue, etc.)
+    @return any -- The extracted value or nil if not a supported type
+]=]
+local function extractValueFromInstance(instance: Instance): any?
+	if
+		instance:IsA("StringValue")
+		or instance:IsA("NumberValue")
+		or instance:IsA("IntValue")
+		or instance:IsA("BoolValue")
+		or instance:IsA("ObjectValue")
+		or instance:IsA("CFrameValue")
+		or instance:IsA("Vector3Value")
+		or instance:IsA("Color3Value")
+		or instance:IsA("BrickColorValue")
+		or instance:IsA("RayValue")
+	then
+		return instance.Value
+	end
+	return nil
+end
+
+--[=[
+    Gets the config container for this controller from ReplicatedStorage.Configs
+    @return Instance? -- The config container or nil
+]=]
+function ShardController:_getConfigContainer(): Instance?
+	local configs = ReplicatedStorage:FindFirstChild("Configs")
+	if not configs then
+		return nil
+	end
+	return configs:FindFirstChild(self.name)
+end
+
+--[=[
     Gets a configuration value
+    Priority order:
+    1. ValueObject child in ReplicatedStorage.Configs.[ControllerName].[key]
+    2. Attribute on ReplicatedStorage.Configs.[ControllerName] folder
+    3. Default config value from :withConfig()
     @param key -- The configuration key
     @param default -- Default value if key doesn't exist
     @return any -- The configuration value or default
 ]=]
 function ShardController:getConfig(key: string?, default: any?)
-	if key == nil and default == nil then return self._config end
+	if key == nil and default == nil then
+		return self._config
+	end
+
+	local container = self:_getConfigContainer()
+	if container then
+		-- Check for ValueObject child first
+		local valueInstance = container:FindFirstChild(key)
+		if valueInstance then
+			local value = extractValueFromInstance(valueInstance)
+			if value ~= nil then
+				return value
+			end
+		end
+
+		-- Check for attribute on the folder
+		local attribute = container:GetAttribute(key)
+		if attribute ~= nil then
+			return attribute
+		end
+	end
 
 	return if self._config[key] ~= nil then self._config[key] else default
 end

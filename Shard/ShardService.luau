@@ -319,9 +319,9 @@ end
 --[=[
     Extracts value from a Roblox Value instance
     @param instance -- The Value instance (StringValue, NumberValue, etc.)
-    @return any -- The extracted value
+    @return any -- The extracted value or nil if not a supported type
 ]=]
-local function extractValueFromInstance(instance: Instance): any
+local function extractValueFromInstance(instance: Instance): any?
 	if
 		instance:IsA("StringValue")
 		or instance:IsA("NumberValue")
@@ -352,10 +352,11 @@ function ShardService:_getConfigContainer(): Instance?
 end
 
 --[=[
-    Gets a configuration value with hierarchical lookup:
-    1. Check attributes on the service's config container
-    2. Check child Value objects in the config container
-    3. Fall back to code-defined config
+    Gets a configuration value
+    Priority order:
+    1. ValueObject child in ServerScriptService.Configs.[ServiceName].[key]
+    2. Attribute on ServerScriptService.Configs.[ServiceName] folder
+    3. Default config value from :withConfig()
     @param key -- The configuration key
     @param default -- Default value if key doesn't exist
     @return any -- The configuration value
@@ -365,20 +366,21 @@ function ShardService:getConfig(key: string?, default: any?)
 		return self._config
 	end
 
-	local configContainer = self:_getConfigContainer()
-
-	if configContainer then
-		local attribute = configContainer:GetAttribute(key)
-		if attribute ~= nil then
-			return attribute
+	local container = self:_getConfigContainer()
+	if container then
+		-- Check for ValueObject child first
+		local valueInstance = container:FindFirstChild(key)
+		if valueInstance then
+			local value = extractValueFromInstance(valueInstance)
+			if value ~= nil then
+				return value
+			end
 		end
 
-		local childValue = configContainer:FindFirstChild(key)
-		if childValue then
-			local extracted = extractValueFromInstance(childValue)
-			if extracted ~= nil then
-				return extracted
-			end
+		-- Check for attribute on the folder
+		local attribute = container:GetAttribute(key)
+		if attribute ~= nil then
+			return attribute
 		end
 	end
 
