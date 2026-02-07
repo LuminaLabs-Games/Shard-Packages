@@ -108,6 +108,13 @@ local function initTaggedUIStroke(uiStroke: UIStroke)
 		return
 	end
 
+	-- Check if stroke should be ignored
+	if uiStroke:GetAttribute("IgnoreAdjuster") then
+		uiStroke:RemoveTag(Screen_Stroke_Tag)
+		uiStroke:RemoveTag(UIStroke_Tag)
+		return
+	end
+
 	-- Initialize OriginalThickness
 	if not uiStroke:GetAttribute("OriginalThickness") then
 		uiStroke:SetAttribute("OriginalThickness", uiStroke.Thickness)
@@ -292,6 +299,11 @@ end)
 
 local function updateScreenGuiStrokes()
 	for _, uiStroke: UIStroke in CollectionService:GetTagged(Screen_Stroke_Tag) do
+		-- Skip strokes that should be ignored
+		if uiStroke:GetAttribute("IgnoreAdjuster") then
+			continue
+		end
+
 		local originalThickness = uiStroke:GetAttribute("OriginalThickness") :: number
 		local ViewportUpdating = uiStroke:GetAttribute("ViewportUpdating")
 
@@ -401,7 +413,7 @@ local BillboardData: { [BillboardGui]: { UIStroke } } = {}
 
 -- Recurisvely tag ui strokes and append to BillboardData
 local function recurseGetUIStrokes(instance: Instance, billboardGui: BillboardGui)
-	if instance:IsA("UIStroke") then
+	if instance:IsA("UIStroke") and not instance:GetAttribute("IgnoreAdjuster") then
 		instance:AddTag("UIStroke")
 		table.insert(BillboardData[billboardGui], instance)
 	end
@@ -481,6 +493,12 @@ if IgnoreBillboards == false then
 			for _, uiStroke in uiStrokes do
 				if not uiStroke:IsDescendantOf(billboardGui) then
 					table.remove(uiStrokes, table.find(uiStrokes, uiStroke))
+					continue
+				end
+
+				-- Skip strokes that should be ignored
+				if uiStroke:GetAttribute("IgnoreAdjuster") then
+					continue
 				end
 
 				local originalThickness = uiStroke:GetAttribute("OriginalThickness") :: number
