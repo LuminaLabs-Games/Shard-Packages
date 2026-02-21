@@ -1,7 +1,7 @@
 [package]
 name = "luminalabsgames/observers"
 description = "A collection of observer utilities for Roblox (character, player, property, attribute, and tag observers)"
-version = "1.0.0"
+version = "1.0.1"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 license = "MIT"

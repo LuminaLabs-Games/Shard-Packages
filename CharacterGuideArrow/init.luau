@@ -1,7 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local observeLocalCharacter = require(ReplicatedStorage.Packages.Observers.observeCharacter)
+local observeLocalCharacter = require(ReplicatedStorage.Packages.Observers).observeLocalCharacter
 local Trove = require(ReplicatedStorage.Packages.Trove)
 
 local ARROW_COLOR = Color3.fromRGB(255, 255, 255)
