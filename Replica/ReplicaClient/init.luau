@@ -183,30 +183,6 @@ export type Replica = {
 local Connection = {}
 Connection.__index = Connection
 
-local FreeRunnerThread
-
---[[
-	Yield-safe coroutine reusing by stravant;
-	Sources:
-	https://devforum.roblox.com/t/lua-signal-class-comparison-optimal-goodsignal-class/1387063
-	https://gist.github.com/stravant/b75a322e0919d60dde8a0316d1f09d2f
---]]
-
-local function AcquireRunnerThreadAndCallEventHandler(fn, ...)
-	local acquired_runner_thread = FreeRunnerThread
-	FreeRunnerThread = nil
-	fn(...)
-	-- The handler finished running, this runner thread is free again.
-	FreeRunnerThread = acquired_runner_thread
-end
-
-local function RunEventHandlerInFreeThread(...)
-	AcquireRunnerThreadAndCallEventHandler(...)
-	while true do
-		AcquireRunnerThreadAndCallEventHandler(coroutine.yield())
-	end
-end
-
 function ConnectionNew(t, fn)
 	local self = setmetatable({
 		t = t,
@@ -218,11 +194,13 @@ function ConnectionNew(t, fn)
 	return self
 end
 
+-- Spawn each handler on its own thread. The previous implementation recycled a single runner thread
+-- (stravant's yield-safe-reuse pattern), which is only safe if no handler ever yields during dispatch:
+-- when one does, the scheduler later resumes the recycled thread with no payload and it calls fn(nil)
+-- -> "attempt to call a nil value". A fresh thread per handler isolates yields entirely; the per-call
+-- cost is negligible at typical replica event volume.
 function ConnectionFire(self, ...)
-	if not FreeRunnerThread then
-		FreeRunnerThread = coroutine.create(RunEventHandlerInFreeThread)
-	end
-	task.spawn(FreeRunnerThread, self.fn, ...)
+	task.spawn(self.fn, ...)
 end
 
 function Connection:Disconnect()
