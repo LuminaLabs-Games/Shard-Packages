@@ -1,0 +1,10 @@
+[package]
+name = "luminalabsgames/betterpath"
+description = "Fork of NoobPath https://devforum.roblox.com/t/noobpath-easy-pathfinding/3254514, ported into Wally, with some improvements"
+version = "1.0.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+license = "MIT"
+authors = ["LuminaLabsGames", "newwil", "gvistic"]
+
+[dependencies]
